@@ -1,0 +1,23 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Layout } from './components/Layout/Layout'
+import { HomePage } from './pages/HomePage'
+import { MissionPage } from './pages/MissionPage'
+import { GamePage } from './pages/GamePage'
+import { RankingPage } from './pages/RankingPage'
+
+function App() {
+  return (
+    <Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/mission" element={<MissionPage />} />
+          <Route path="/game" element={<GamePage />} />
+          <Route path="/ranking" element={<RankingPage />} />
+        </Routes>
+      </Layout>
+    </Router>
+  )
+}
+
+export default App

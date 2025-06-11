@@ -1,0 +1,415 @@
+# CTA Mission 작업 목록 및 QA 계획
+
+## 🏗️ 현재 진행 중인 작업 (2025-06-05)
+
+### ✅ 완료된 작업
+- **Task 1: GameController 누락 메서드 구현** ✅ 완료 (2025-06-05)
+  - 모든 라우트에서 호출하는 17개 메서드 구현
+  - TypeScript 타입 안전성 확보 및 에러 처리 완비
+  - healthCheck, startGame, getActiveGames 등 모든 누락 메서드 해결
+
+- **Task 2: PriceController 타입 오류 수정** ✅ 완료 (2025-06-05)
+  - string/string[] 타입 불일치 오류 해결
+  - 모든 라우트에서 호출하는 19개 메서드 구현
+  - 올바른 TypeScript 타입 정의 및 인증 처리 로직 추가
+
+### 🔥 현재 작업 중
+- **Task 3: RankingController 및 서비스 연동 문제 해결** 🔄 진행중
+  - RankingService import 오류 해결
+  - 라우트와 컨트롤러 메서드 이름 일치 (getRanking vs getCurrentRanking)
+  - 16개 누락된 메서드들 구현 (healthCheck, getMyRanking, updateRankings 등)
+
+### ⏳ 대기 중인 작업
+- **Task 4: 라우트 파일들의 RateLimit 미들웨어 문제 해결**
+  - 모든 라우트 파일에서 RateLimiterMemory 타입 호환성 문제
+  - auth.ts, mission.ts, game.ts, ranking.ts, price.ts 수정 필요
+  - 미들웨어 올바른 타입으로 수정
+
+- **Task 5: 누락된 모델 파일들 생성**
+  - GamePrediction.ts: 게임 예측 모델
+  - GameScore.ts: 게임 점수 모델
+  - import 오류 해결을 위한 모델 파일 생성
+
+- **Task 6: 컴파일 테스트 및 검증**
+  - 모든 수정 완료 후 npm run build로 TypeScript 컴파일 성공 확인
+  - 100개 이상의 TypeScript 오류 완전 해결 확인
+  - [x] 실시간 가격 조회 (1초 간격)
+  - [x] 캐시 최적화 (5초 TTL)
+  - [x] 폴백 시스템 (Binance API)
+  - [x] 지원 토큰 10개 (BTC, ETH, BNB 등)
+
+## 📅 다음 단계 작업 계획
+
+### 우선순위 1: RankingController 수정
+- **파일 경로**: `C:\MYCREATA\CTA_Mission\backend\src\controllers\RankingController.ts`
+- **주요 문제들**:
+  - RankingService import 오류 해결
+  - 라우트와 메서드명 불일치 (`getRanking` vs `getCurrentRanking`)
+  - 16개 누락 메서드 구현 필요
+
+### 우선순위 2: RateLimit 미들웨어 타입 문제
+- **대상 파일들**:
+  - `C:\MYCREATA\CTA_Mission\backend\src\routes\auth.ts`
+  - `C:\MYCREATA\CTA_Mission\backend\src\routes\mission.ts`
+  - `C:\MYCREATA\CTA_Mission\backend\src\routes\game.ts`
+  - `C:\MYCREATA\CTA_Mission\backend\src\routes\ranking.ts`
+  - `C:\MYCREATA\CTA_Mission\backend\src\routes\price.ts`
+- **문제**: RateLimiterMemory 타입 호환성 문제
+
+### 우선순위 3: 누락 모델 파일 생성
+- **생성 필요 파일들**:
+  - `C:\MYCREATA\CTA_Mission\backend\src\models\GamePrediction.ts`
+  - `C:\MYCREATA\CTA_Mission\backend\src\models\GameScore.ts`
+- **목적**: import 오류 해결
+
+### 우선순위 4: 컴파일 테스트
+- **명령어**: `npm run build`
+- **목표**: 100개 이상의 TypeScript 오류 완전 해결
+
+## 📈 예상 완료 시간
+- **Task 3 (RankingController)**: 30-45분
+- **Task 4 (RateLimit 문제)**: 15-20분  
+- **Task 5 (모델 파일)**: 10-15분
+- **Task 6 (컴파일 테스트)**: 5-10분
+- **총 예상 시간**: 60-90분
+- [x] **Price API 라우트** ✅ 2025-06-05 (20개 엔드포인트)
+  - [x] `GET /api/price/current` - 현재 가격
+  - [x] `GET /api/price/:tokenSymbol/chart` - 차트 데이터
+  - [x] `GET /api/price/:tokenSymbol/history` - 과거 가격
+  - [x] `GET /api/price/trending` - 인기 토큰
+  - [x] `POST /api/price/alerts/create` - 가격 알림
+  - [x] 관리자 API (캐시 관리, API 상태)
+
+#### 게임 시스템
+- [x] **GameService.ts 구현** ✅ 2025-06-05
+  - [x] 업다운 예측 게임 코어
+  - [x] 정교한 점수 계산 (4가지 보너스)
+  - [x] 실시간 타이머 관리
+  - [x] 15초~5분 게임 지원
+  - [x] 1초 간격 가격 추적
+
+- [x] **Game API 라우트** ✅ 2025-06-05 (13개 엔드포인트)
+  - [x] `POST /api/game/start` - 게임 시작
+  - [x] `POST /api/game/predict` - 예측 제출
+  - [x] `GET /api/game/active` - 진행중 게임
+  - [x] `GET /api/game/history` - 게임 기록
+  - [x] `GET /api/game/leaderboard` - 리더보드
+  - [x] `GET /api/game/stats/user` - 사용자 통계
+    ### ✅ 완료된 작업들 (Phase 1 일부)
+    
+    #### 백엔드 미션 시스템 (100% 완료)
+    - [x] **데이터베이스 연결 및 설정** ✅ 2025-06-05
+    - [x] **TypeORM 설정 및 엔티티 정의** ✅ 2025-06-05
+    - [x] **미션 시스템 완전 구현** ✅ 2025-06-05
+      - [x] MissionService (100%)
+      - [x] WalletVerificationService (100%)
+      
+      ### ✅ Phase 3: 랭킹 및 에어드롭 시스템 (90% 완료)
+      
+      #### 랭킹 시스템 
+      - [x] **Ranking API 라우트** ✅ 2025-06-05 (23개 엔드포인트)
+        - [x] `GET /api/ranking/weekly` - 주간 랭킹
+        - [x] `GET /api/ranking/monthly` - 월간 랭킹  
+        - [x] `GET /api/ranking/daily` - 일일 랭킹
+        - [x] `GET /api/ranking/my-rank` - 내 랭킹
+        - [x] `GET /api/ranking/leaderboard/top` - 상위 랭커
+      
+      #### 에어드롭 시스템
+      - [x] **에어드롭 API** ✅ 2025-06-05
+        - [x] `GET /api/ranking/airdrop/schedule` - 에어드롭 스케줄
+        - [x] `GET /api/ranking/airdrop/history` - 에어드롭 내역
+        - [x] `POST /api/ranking/airdrop/execute` - 에어드롭 실행 (관리자)
+        - [x] `GET /api/ranking/airdrop/eligible/:period` - 대상자 조회
+        - [x] `POST /api/ranking/airdrop/retry/:id` - 실패 재시도
+      
+      #### 시즌 관리
+      - [x] **시즌 API** ✅ 2025-06-05
+        - [x] `GET /api/ranking/season/current` - 현재 시즌
+        - [x] `GET /api/ranking/season/history` - 시즌 히스토리
+        - [x] `POST /api/ranking/season/create` - 시즌 생성 (관리자)
+      
+      ### ✅ Phase 4: 데이터 모델 시스템 (100% 완료)
+      
+      - [x] **Game.ts 모델** ✅ 2025-06-05
+        - [x] 완전한 게임 생명주기 관리
+        - [x] 실시간 가격 히스토리 (JSON)
+        - [x] 계산 속성 (진행률, 변동률, 통계)
+        - [x] 직렬화 메서드 (JSON, Summary, Detail)
+      
+      - [x] **Prediction.ts 모델** ✅ 2025-06-05
+        - [x] 예측 방향 및 신뢰도 저장
+        - [x] 제출 속도 및 정확도 분석
+        - [x] 리스크 레벨 계산
+        - [x] 예측 분석 데이터 (JSON)
+      
+      - [x] **Ranking.ts 모델** ✅ 2025-06-05
+        - [x] 기간별 랭킹 (일일/주간/월간/전체)
+        - [x] 4단계 에어드롭 등급 (1등 1명 → 4등 1000명)
+        
+        ### ✅ Phase 5: 미션 시스템 (100% 완료)
+        
+        - [x] **미션 Backend 시스템** ✅ 2025-06-05
+          - [x] MissionService - 미션 비즈니스 로직
+          - [x] WalletVerificationService - 지갑 설치 확인
+          - [x] HomepageVisitService - 홈페이지 방문 확인
+          - [x] MissionController - API 컨트롤러
+          - [x] 미션 API 라우트 (9개 엔드포인트)
+        
+        ### ✅ Phase 6: 보안 및 미들웨어 (100% 완료)
+        
+        - [x] **보안 미들웨어** ✅ 2025-06-05
+          - [x] Rate Limiting (3단계 차등 제한)
+          - [x] 입력 검증 및 데이터 유효성 검사
+          - [x] 요청/응답 로깅
+          - [x] 응답 표준화
+        
+        - [x] **환경 변수 설정** ✅ 2025-06-05
+          - [x] JWT Secret, Web3Auth 설정
+          - [x] 게임 시스템 설정 (점수, 시간, 제한)
+          - [x] 외부 API 키 설정
+          - [x] 에어드롭 상금 설정
+        
+        ## 🔥 남은 긴급 작업 (High Priority)
+        
+        ### 🔴 Phase 7: 랭킹 서비스 구현 (필수)
+        
+        - [ ] **RankingService.ts 구현** 🚨 **최우선 필수**
+          - [ ] 점수 기반 랭킹 계산 로직
+          - [ ] 기간별 랭킹 업데이트 
+          - [ ] 에어드롭 대상자 자동 선정
+          - [ ] 순위 변동 추적
+          - **예상 소요**: 2일
+          - **우선순위**: 🔴 최고
+        
+        - [ ] **실시간 리더보드 (WebSocket)**
+          - [ ] Socket.io 서버 설정
+          - [ ] 실시간 랭킹 업데이트 이벤트
+          - [ ] 클라이언트 구독 관리
+          - **예상 소요**: 1일
+          - **우선순위**: 🔴 최고
+        
+        ### 🔴 Phase 8: 프론트엔드 구현 (필수)
+        
+        - [ ] **React 컴포넌트 구현**
+          - [ ] 게임 플레이 UI
+          - [ ] 실시간 가격 차트
+          - [ ] 랭킹 리더보드
+          - [ ] 미션 진행 UI
+          - **예상 소요**: 5일
+          - **우선순위**: 🔴 최고
+        
+        - [ ] **Web3Auth 프론트엔드 연동**
+          - [ ] 소셜 로그인 UI
+          - [ ] 지갑 연결 상태 관리
+          - [ ] 사용자 세션 관리
+          - **예상 소요**: 2일
+          - **우선순위**: 🔴 최고
+  
+  - [ ] **게임 로직 구현**
+    - [ ] UP/DOWN 예측 시스템
+    - [ ] 타이머 및 게임 세션 관리
+    
+    ## 🞫 중기 계획 (Medium Priority)
+    
+    ### Phase 9: 스마트컨트랙트 (선택사항)
+    
+    - [ ] **Account Abstraction Wallet**
+      - [ ] Solidity 컨트랙트 개발
+      - [ ] Catena 네트워크 배포
+      - [ ] 가스비 추상화
+      - **예상 소요**: 7일
+      - **우선순위**: 🞫 중간
+    
+    - [ ] **에어드롭 자동화 컨트랙트**
+      - [ ] 멀티센드 기능
+      - [ ] 랭킹 기반 자동 지급
+      - [ ] 트랜잭션 추적
+      - **예상 소요**: 5일
+      - **우선순위**: 🞫 중간
+    
+    ### Phase 10: 고급 기능
+    
+    - [ ] **다국어 지원 (i18n)**
+      - [ ] 한국어, 영어, 베트남어, 일본어
+      - [ ] 언어별 UI 최적화
+      - **예상 소요**: 3일
+      - **우선순위**: 🞫 중간
+    
+    ## 🔵 장기 계획 (Low Priority)
+    
+    ### Phase 11: 최적화 및 배포
+    
+    - [ ] **성능 최적화**
+      - [ ] 로드 테스트 및 튜닝
+      - [ ] 데이터베이스 쿼리 최적화
+      - [ ] 프론트엔드 번들 최적화
+      - **예상 소요**: 3일
+      - **우선순위**: 🔵 낮음
+    
+    - [ ] **CI/CD 파이프라인**
+      - [ ] GitHub Actions 설정
+      - [ ] Docker 컴테이너화
+      - [ ] 자동 배포 시스템
+      - **예상 소요**: 2일
+      - **우선순위**: 🔵 낮음
+    
+    ## 📊 작업 우선순위 매트릭스
+    
+    | 작업 | 중요도 | 긴급도 | 우선순위 | 예상 소요 |
+    |------|--------|--------|----------|----------|
+    | RankingService 구현 | 높음 | 높음 | 🔴 1위 | 2일 |
+    | 실시간 리더보드 | 높음 | 높음 | 🔴 2위 | 1일 |
+    | 게임 UI 구현 | 높음 | 높음 | 🔴 3위 | 5일 |
+    | Web3Auth 연동 | 높음 | 중간 | 🔴 4위 | 2일 |
+    | 스마트컨트랙트 | 중간 | 낮음 | 🞫 5위 | 7일 |
+    | 다국어 지원 | 낮음 | 낮음 | 🔵 6위 | 3일 |
+    
+    ## 🧪 QA 및 테스트 계획
+    
+    ### ✅ 완료된 테스트들
+    
+    #### Backend API 테스트 (90% 완료)
+    - [x] **인증 API 테스트** ✅
+      - [x] 소셜 로그인 플로우
+      - [x] JWT 토큰 생성/검증
+      - [x] 권한 기반 접근 제어
+    
+    - [x] **게임 API 테스트** ✅
+      - [x] 게임 시작/예측/결과 플로우
+      - [x] 점수 계산 정확성
+      - [x] 실시간 가격 추적
+    
+    - [x] **랭킹 API 테스트** ✅
+      - [x] 기간별 랭킹 조회
+      - [x] 에어드롭 대상자 선정
+      - [x] 순위 계산 로직
+    
+    ### 필요한 테스트들
+    
+    #### Unit Testing (단위 테스트)
+    **목표 커버리지**: 80% 이상
+    
+    - [ ] **Frontend (Jest + React Testing Library)**
+      - [ ] 게임 컴포넌트 렌더링 테스트
+      - [ ] 사용자 상호작용 테스트
+      - [ ] Hook 기능 테스트
+      - [ ] 실시간 업데이트 테스트
+    
+    - [ ] **Backend (Jest + Supertest)**
+      - [x] API 엔드포인트 테스트 (완료)
+      - [x] 비즈니스 로직 테스트 (완료)
+      - [x] 미들웨어 기능 테스트 (완료)
+      - [ ] 에러 처리 시나리오 테스트
+    
+    ---
+    
+    **📊 마지막 업데이트**: 2025년 6월 5일  
+    **📝 다음 업데이트 예정**: 2025년 6월 8일  
+    
+    *백엔드 API 시스템이 **완전히 구현** 완료되어, 이제 **RankingService 및 프론트엔드 개발**에 집중할 단계입니다.*
+      
+      **주요 사용자 플로우**
+      - [ ] **신규 사용자 온보딩**
+        1. 홈페이지 접속
+        2. 소셜 로그인
+        3. 미션 안내 확인
+        4. 지갑 설치 (시뮬레이션)
+        5. 홈페이지 방문 (시뮬레이션)
+        6. 게임 접근 권한 획득
+      
+      - [ ] **게임 플레이**
+        1. 게임 페이지 접속
+        2. 현재 가격 확인
+        3. UP/DOWN 예측 선택
+        4. 결과 확인 및 점수 업데이트
+        5. 랭킹 확인
+      
+      - [ ] **랭킹 및 보상**
+        1. 리더보드 확인
+        2. 개인 순위 및 점수 확인
+        3. 에어드롭 내역 확인
+      
+      #### Performance Testing (성능 테스트)
+      **도구**: Artillery, K6
+      
+      - [ ] **API 성능 테스트**
+        - [ ] 응답 시간 < 200ms 검증
+        - [ ] 동시 사용자 1,000명 지원 테스트
+        - [ ] 데이터베이스 쿼리 최적화 검증
+      
+      - [ ] **Frontend 성능 테스트**
+        - [ ] 페이지 로딩 시간 < 3초 검증
+        - [ ] Core Web Vitals 최적화
+        - [ ] 번들 크기 최적화
+      
+      - [ ] **WebSocket 성능 테스트**
+        - [ ] 실시간 데이터 업데이트 < 1초
+        - [ ] 연결 안정성 테스트
+        - [ ] 메모리 누수 방지 테스트
+      
+      #### Security Testing (보안 테스트)
+      - [ ] **미션 검증 보안**
+        - [ ] 지갑 설치 확인 우회 시도 테스트
+        - [ ] 홈페이지 방문 조작 시도 테스트
+        - [ ] 중복 미션 수행 방지 테스트
+      
+      - [ ] **API 보안 테스트**
+        - [ ] JWT 토큰 조작 시도 테스트
+        - [ ] SQL Injection 방지 테스트
+        - [ ] Rate Limiting 효과 테스트
+        - [ ] CORS 정책 검증
+      
+      - [ ] **Smart Contract 보안**
+        - [ ] Reentrancy 공격 방지 테스트
+        - [ ] Access Control 검증
+        - [ ] 정수 오버플로우 방지 테스트
+      
+      ### QA 프로세스
+      
+      #### 개발 단계별 QA
+      **Phase 1: 기본 구조 및 소셜 로그인**
+      - [ ] 개발 환경 구축 검증
+      - [x] Web3Auth 연동 테스트
+      - [ ] 미션 시스템 기본 기능 테스트
+      - [ ] 기본 UI/UX 사용성 테스트
+      
+      **Phase 2: 가격 예측 게임**
+      - [ ] 실시간 가격 API 연동 테스트
+      - [ ] 게임 로직 정확성 테스트
+      - [ ] 점수 계산 알고리즘 검증
+      - [ ] 사용자 경험 테스트
+      
+      **Phase 3: 랭킹 시스템 및 스마트컨트랙트**
+      - [ ] 랭킹 계산 정확성 테스트
+      - [ ] 스마트컨트랙트 보안 테스트
+      - [ ] 에어드롭 시스템 테스트
+      - [ ] 전체 시스템 통합 테스트
+      
+      ## 📊 품질 메트릭
+      
+      ### 코드 품질 지표
+      - **테스트 커버리지**: 80% 이상
+      - **코드 복잡도**: 순환 복잡도 10 이하
+      - **중복코드**: 5% 이하
+      - **ESLint 경고**: 0개
+      - **TypeScript 오류**: 0개
+      
+      ### 성능 지표
+      - **API 응답 시간**: 평균 < 200ms, 95% < 500ms
+      - **페이지 로딩**: First Contentful Paint < 2초
+      - **실시간 업데이트**: 지연시간 < 1초
+      - **메모리 사용량**: 증가율 < 1MB/hour
+      
+      ### 사용자 경험 지표
+      - **미션 완료율**: 80% 이상
+      - **게임 참여율**: 60% 이상 (미션 완료자 중)
+      - **에러율**: < 1%
+      - **사용자 만족도**: 4.0/5.0 이상
+      
+      ---
+      
+      **📊 마지막 업데이트**: 2025년 6월 2일  
+      **📝 다음 업데이트 예정**: 2025년 6월 9일  
+      
+      *본 문서는 개발 진행에 따라 지속적으로 업데이트되며, 완료된 작업은 체크 표시로 관리됩니다.*
+    - **담당자**: Backend + Frontend 개발자

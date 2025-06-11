@@ -1,0 +1,279 @@
+import { DataSource, EntityManager } from 'typeorm';
+import { AppDataSource } from './typeorm';
+import { logger } from '../utils/logger';
+
+/**
+ * 데이터베이스 연결 상태 관리 클래스
+ */
+class DatabaseManager {
+  private static instance: DatabaseManager;
+  private dataSource: DataSource;
+  private isConnected: boolean = false;
+
+  private constructor() {
+    this.dataSource = AppDataSource;
+  }
+
+  /**
+   * 싱글톤 인스턴스 반환
+   */
+  public static getInstance(): DatabaseManager {
+    if (!DatabaseManager.instance) {
+      DatabaseManager.instance = new DatabaseManager();
+    }
+    return DatabaseManager.instance;
+  }
+
+  /**
+   * 데이터베이스 연결 초기화
+   * @returns Promise<DataSource> 연결된 데이터소스
+   */
+  public async initialize(): Promise<DataSource> {
+    try {
+      if (this.isConnected && this.dataSource.isInitialized) {
+        logger.info('데이터베이스가 이미 연결되어 있습니다.');
+        return this.dataSource;
+      }
+
+      logger.info('데이터베이스 연결을 시도합니다...');
+      logger.info(`호스트: ${this.dataSource.options.host}:${this.dataSource.options.port}`);
+      logger.info(`데이터베이스: ${this.dataSource.options.database}`);
+
+      // 데이터베이스 연결
+      await this.dataSource.initialize();
+      this.isConnected = true;
+
+      logger.info('데이터베이스 연결이 성공했습니다.');
+
+      // 연결 상태 확인
+      await this.testConnection();
+
+      // 테이블 생성 확인 (개발 환경에서만)
+      if (process.env.NODE_ENV === 'development') {
+        await this.verifyTables();
+      }
+
+      return this.dataSource;
+    } catch (error) {
+      this.isConnected = false;
+      logger.error('데이터베이스 연결 실패:', error);
+      throw new Error(`데이터베이스 연결 실패: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * 데이터베이스 연결 테스트
+   */
+  private async testConnection(): Promise<void> {
+    try {
+      const result = await this.dataSource.query('SELECT NOW() as current_time, version() as pg_version');
+      logger.info('데이터베이스 연결 테스트 성공');
+      logger.info(`현재 시간: ${result[0]?.current_time}`);
+      logger.info(`PostgreSQL 버전: ${result[0]?.pg_version?.split(' ')[0]}`);
+    } catch (error) {
+      logger.error('데이터베이스 연결 테스트 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 테이블 생성 상태 확인 (개발 환경)
+   */
+  private async verifyTables(): Promise<void> {
+    try {
+      const tableQuery = `
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_type = 'BASE TABLE'
+        ORDER BY table_name;
+      `;
+      
+      const tables = await this.dataSource.query(tableQuery);
+      const tableNames = tables.map((table: any) => table.table_name);
+      
+      logger.info('데이터베이스 테이블 목록:', tableNames);
+      
+      // 필수 테이블 확인
+      const requiredTables = ['users', 'missions', 'user_missions', 'point_histories'];
+      const missingTables = requiredTables.filter(table => !tableNames.includes(table));
+      
+      if (missingTables.length > 0) {
+        logger.warn('누락된 테이블:', missingTables);
+      } else {
+        logger.info('모든 필수 테이블이 존재합니다.');
+      }
+    } catch (error) {
+      logger.error('테이블 확인 실패:', error);
+      // 테이블 확인 실패는 치명적이지 않으므로 에러를 던지지 않음
+    }
+  }
+
+  /**
+   * 데이터베이스 연결 종료
+   */
+  public async close(): Promise<void> {
+    try {
+      if (this.isConnected && this.dataSource.isInitialized) {
+        await this.dataSource.destroy();
+        this.isConnected = false;
+        logger.info('데이터베이스 연결이 종료되었습니다.');
+      } else {
+        logger.info('데이터베이스가 이미 연결 해제되어 있습니다.');
+      }
+    } catch (error) {
+      logger.error('데이터베이스 연결 종료 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 데이터베이스 연결 상태 확인
+   */
+  public isInitialized(): boolean {
+    return this.isConnected && this.dataSource.isInitialized;
+  }
+
+  /**
+   * 데이터소스 반환
+   */
+  public getDataSource(): DataSource {
+    if (!this.isInitialized()) {
+      throw new Error('데이터베이스가 초기화되지 않았습니다. initialize()를 먼저 호출하세요.');
+    }
+    return this.dataSource;
+  }
+
+  /**
+   * 데이터베이스 헬스 체크
+   */
+  public async healthCheck(): Promise<{
+    status: 'healthy' | 'unhealthy';
+    timestamp: Date;
+    details: any;
+  }> {
+    try {
+      if (!this.isInitialized()) {
+        return {
+          status: 'unhealthy',
+          timestamp: new Date(),
+          details: { error: 'Database not connected' }
+        };
+      }
+
+      // 간단한 쿼리로 헬스 체크
+      const result = await this.dataSource.query('SELECT 1 as health_check');
+      
+      // 연결 풀 정보
+      const poolInfo = {
+        totalConnections: this.dataSource.options.extra?.max || 'unknown',
+        database: this.dataSource.options.database,
+        host: this.dataSource.options.host,
+        port: this.dataSource.options.port
+      };
+
+      return {
+        status: 'healthy',
+        timestamp: new Date(),
+        details: {
+          queryResult: result[0]?.health_check === 1,
+          connectionPool: poolInfo,
+          uptime: process.uptime()
+        }
+      };
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        timestamp: new Date(),
+        details: {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined
+        }
+      };
+    }
+  }
+
+  /**
+   * 트랜잭션 실행
+   */
+  public async runInTransaction<T>(
+    operation: (manager: EntityManager) => Promise<T>
+  ): Promise<T> {
+    if (!this.isInitialized()) {
+      throw new Error('데이터베이스가 초기화되지 않았습니다.');
+    }
+
+    return await this.dataSource.transaction(async (manager) => {
+      return await operation(manager);
+    });
+  }
+}
+
+// 싱글톤 인스턴스
+const databaseManager = DatabaseManager.getInstance();
+
+/**
+ * 데이터베이스 초기화 (간편 함수)
+ */
+export const initializeDatabase = async (): Promise<DataSource> => {
+  return await databaseManager.initialize();
+};
+
+/**
+ * 데이터베이스 연결 종료 (간편 함수)
+ */
+export const closeDatabaseConnection = async (): Promise<void> => {
+  await databaseManager.close();
+};
+
+/**
+ * 데이터베이스 상태 확인 (간편 함수)
+ */
+export const isDatabaseConnected = (): boolean => {
+  return databaseManager.isInitialized();
+};
+
+/**
+ * 데이터베이스 헬스 체크 (간편 함수)
+ */
+export const checkDatabaseHealth = async () => {
+  return await databaseManager.healthCheck();
+};
+
+/**
+ * 데이터소스 반환 (간편 함수)
+ */
+export const getDataSource = (): DataSource => {
+  return databaseManager.getDataSource();
+};
+
+/**
+ * 트랜잭션 실행 (간편 함수)
+ */
+export const runInTransaction = async <T>(
+  operation: (manager: any) => Promise<T>
+): Promise<T> => {
+  return await databaseManager.runInTransaction(operation);
+};
+
+// 프로세스 종료 시 정리
+const gracefulShutdown = async (signal: string) => {
+  logger.info(`${signal} 신호를 받았습니다. 데이터베이스 연결을 정리합니다...`);
+  try {
+    await databaseManager.close();
+    logger.info('데이터베이스 연결 정리 완료');
+    process.exit(0);
+  } catch (error) {
+    logger.error('데이터베이스 연결 정리 중 오류:', error);
+    process.exit(1);
+  }
+};
+
+// 프로세스 종료 신호 처리
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+// DatabaseManager 클래스와 인스턴스도 export
+export { DatabaseManager, databaseManager };
+
+export default databaseManager;

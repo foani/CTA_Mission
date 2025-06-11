@@ -1,0 +1,71 @@
+ {
+   "compilerOptions": {
+     /* 언어 및 환경 */
+     "target": "ES2022",                      // 최신 Node.js 지원
+     "lib": ["ES2022"],                       // ES2022 라이브러리 사용
+     "module": "commonjs",                    // Node.js 표준 모듈 시스템
+     "downlevelIteration": true,
+     
+     /* 모듈 해석 */
+     "moduleResolution": "node",              // Node.js 스타일 모듈 해석
+     "baseUrl": "./src",                      // 모듈 해석 기본 경로
+     "paths": {                               // 경로 별칭 설정
+       "@/*": ["*"],
+       "@config/*": ["config/*"],
+       "@controllers/*": ["controllers/*"],
+       "@models/*": ["models/*"],
+       "@routes/*": ["routes/*"],
+       "@services/*": ["services/*"],
+       "@middlewares/*": ["middlewares/*"],
+       "@utils/*": ["utils/*"],
+       "@types/*": ["types/*"]
+     },
+     "resolveJsonModule": true,               // JSON 모듈 import 허용
+     "allowJs": false,                        // JavaScript 파일 컴파일 비활성화
+     
+     /* JavaScript 지원 */
+     "outDir": "./dist",                      // 컴파일된 파일 출력 디렉토리
+     "rootDir": "./src",                      // 소스 파일 루트 디렉토리
+     "removeComments": true,                  // 주석 제거
+     "sourceMap": true,                       // 소스맵 생성
+     
+     /* 타입 체크 */
+     "strict": false,                          // 모든 엄격한 타입 체크 옵션 비활성화 (임시)
+     "noImplicitAny": false,                   // 암시적 any 타입 허용 (임시)
+     "strictNullChecks": false,                // 엄격한 null 체크 비활성화 (임시)
+     "strictFunctionTypes": false,             // 엄격한 함수 타입 체크 비활성화 (임시)
+     "strictBindCallApply": false,             // 엄격한 bind, call, apply 체크 비활성화 (임시)
+     "strictPropertyInitialization": false,     // TypeORM 엔티티를 위해 false로 설정
+     "noImplicitThis": false,                  // 암시적 this 타입 허용 (임시)
+     "alwaysStrict": false,                    // strict mode 비활성화 (임시)
+     
+     /* 추가 체크 */
+     "noUnusedLocals": true,                  // 사용하지 않는 지역 변수 오류
+     "noUnusedParameters": true,              // 사용하지 않는 매개변수 오류
+     "noImplicitReturns": true,               // 암시적 반환 금지
+     "noFallthroughCasesInSwitch": true,      // switch문 fallthrough 금지
+     "noUncheckedIndexedAccess": true,        // 인덱스 접근 시 undefined 체크
+     
+     /* 호환성 */
+     "esModuleInterop": true,                 // ES 모듈 호환성
+     "allowSyntheticDefaultImports": true,     // default import 허용
+     "forceConsistentCasingInFileNames": true, // 파일명 대소문자 일관성
+     "skipLibCheck": true,                    // 라이브러리 타입 체크 건너뛰기
+     
+     /* 실험적 기능 */
+     "experimentalDecorators": true,          // 데코레이터 실험적 지원
+     "emitDecoratorMetadata": true            // 데코레이터 메타데이터 생성
+   },
+   "include": [
+     "src/**/*"                               // src 디렉토리의 모든 파일 포함
+   ],
+   "exclude": [
+     "node_modules",                          // node_modules 제외
+     "dist",                                  // 빌드 출력 디렉토리 제외
+     "**/*.spec.ts",                          // 테스트 파일 제외
+     "**/*.test.ts"                           // 테스트 파일 제외
+   ],
+   "ts-node": {
+     "require": ["tsconfig-paths/register"]    // ts-node에서 경로 별칭 사용
+   }
+ }

@@ -1,0 +1,105 @@
+import { DataSource, DataSourceOptions } from 'typeorm';
+import { User } from '../models/User';
+import { Mission } from '../models/Mission';
+import { UserMission } from '../models/UserMission';
+import { PointHistory } from '../models/PointHistory';
+
+/**
+ * TypeORM 데이터소스 설정
+ * CLI 도구 및 마이그레이션에서 사용되는 설정 파일
+ */
+const dataSourceOptions: DataSourceOptions = {
+  type: 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5432'),
+  username: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || 'postgres',
+  database: process.env.DB_NAME || 'cta_mission',
+  
+  // 개발 환경에서만 동기화 활성화
+  synchronize: process.env.NODE_ENV === 'development',
+  
+  // 로깅 설정 (CLI에서는 상세 로깅)
+  logging: process.env.NODE_ENV === 'development' ? ['query', 'error', 'schema'] : ['error'],
+  
+  // 엔티티 목록
+  entities: [
+    User,
+    Mission, 
+    UserMission,
+    PointHistory
+  ],
+  
+  // 마이그레이션 파일 위치
+  migrations: [
+    'src/migrations/**/*.ts'
+  ],
+  
+  // 구독자 파일 위치
+  subscribers: [
+    'src/subscribers/**/*.ts'
+  ],
+  
+  // CLI 설정
+  cli: {
+    entitiesDir: 'src/models',
+    migrationsDir: 'src/migrations',
+    subscribersDir: 'src/subscribers'
+  },
+  
+  // 메타데이터 테이블 이름
+  metadataTableName: 'typeorm_metadata',
+  
+  // 트랜잭션 격리 수준
+  isolationLevel: 'READ_COMMITTED',
+  
+  // 스키마 드롭 설정 (운영 환경에서는 절대 true 안됨)
+  dropSchema: false,
+  
+  // 캐시 설정
+  cache: process.env.NODE_ENV === 'production' ? {
+    type: 'redis',
+    options: {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+    }
+  } : false,
+  
+  // SSL 설정
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false
+  } : false,
+  
+  // 추가 연결 옵션
+  extra: {
+    // 연결 풀 설정
+    max: parseInt(process.env.DB_POOL_MAX || '10'),
+    min: parseInt(process.env.DB_POOL_MIN || '5'),
+    
+    // 연결 타임아웃
+    connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '10000'),
+    idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'),
+    
+    // 쿼리 타임아웃
+    query_timeout: parseInt(process.env.DB_QUERY_TIMEOUT || '60000'),
+    
+    // 연결 재시도
+    acquireTimeoutMillis: parseInt(process.env.DB_ACQUIRE_TIMEOUT || '60000'),
+    
+    // PostgreSQL 특정 설정
+    application_name: 'CTA_Mission_App',
+    
+    // 연결 유지
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 0,
+  }
+};
+
+// TypeORM CLI 및 마이그레이션용 데이터소스
+export const AppDataSource = new DataSource(dataSourceOptions);
+
+// 설정 옵션을 별도로 export (다른 곳에서 참조 가능)
+export { dataSourceOptions };
+
+// 기본 export
+export default AppDataSource;
